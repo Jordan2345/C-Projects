@@ -12,25 +12,20 @@ namespace MonopolySim
                                      "States Avenue","Viginia Avenue","Pennsylvania Railroad","St. James Place","Tennessee Avenue","New York Avenue","Kentucky Avenue","Indiana Avenue","Illinois Avenue",
                                      "B&O railroad","Atlantic Avenue","Ventor Avenue","Water Works","Marvin Gardens","Pacific Avenue","North Carolina Avenue","Pennsylvania Avenue","Short line",
                                      "Park Place","Boardwalk"};
-        private static string[] allSpots = {"Go","Mediterranean Avenue","Community Chest","Baltic Avenue","Income Tax","Reading Railroad","Oriental Avenue","Chance","Vermont Avenue","Connecticut Avenue","In Jail/Just Visiting","St. Charles Place","Electric Company",
-                                     "States Avenue","Viginia Avenue","Pennsylvania Railroad","St. James Place","Community Chest","Tennessee Avenue","New York Avenue","Free Parking","Kentucky Avenue","Chance","Indiana Avenue","Illinois Avenue",
-                                     "B&O railroad","Atlantic Avenue","Ventor Avenue","Water Works","Marvin Gardens","Go To Jail","Pacific Avenue","North Carolina Avenue","Community Chest","Pennsylvania Avenue","Short line",
-                                     "Chance","Park Place","Luxury Tax","Boardwalk"};
+        private static string[] allSpots = {"Go","Mediterranean Avenue","Community Chest1","Baltic Avenue","Income Tax","Reading Railroad","Oriental Avenue","Chance1","Vermont Avenue","Connecticut Avenue","In Jail/Just Visiting","St. Charles Place","Electric Company",
+                                     "States Avenue","Viginia Avenue","Pennsylvania Railroad","St. James Place","Community Chest2","Tennessee Avenue","New York Avenue","Free Parking","Kentucky Avenue","Chance2","Indiana Avenue","Illinois Avenue",
+                                     "B&O railroad","Atlantic Avenue","Ventor Avenue","Water Works","Marvin Gardens","Go To Jail","Pacific Avenue","North Carolina Avenue","Community Chest3","Pennsylvania Avenue","Short line",
+                                     "Chance3","Park Place","Luxury Tax","Boardwalk"};
         //create 28 empty strings
         private static string[] ownedSpots= Enumerable.Repeat(string.Empty, 28).ToArray();
+        //create 40 ints to count the amount of times landed on a certain place
+        private static int[] numTimesLanded = new int[40];
         private static int ownedSpotsIndex = 0;
+        private static int landedCounter = 0;
+        private static int jailRolls = 0;
         private static Random dice = new Random();
-        private static int num2=0;
-        private static int num3 =0;
-        private static int num4 =0;
-        private static int num5 =0;
-        private static int num6 =0;
-        private static int num7 =0;
-        private static int num8 =0;
-        private static int num9 =0;
-        private static int num10 =0;
-        private static int num11 =0;
-        private static int num12 =0;
+        private static int num2,num3,num4,num5,num6,num7,num8,num9,num10,num11,num12,doubles=0;
+
 
 
 
@@ -57,24 +52,32 @@ namespace MonopolySim
                     currentIndex = 0;
                 else if(currentIndex==30)
                 {
+                    numTimesLanded[currentIndex]++;
+                    landedCounter++;
                     bool inJail = true;
                     currentIndex = 10;
                     Console.WriteLine("You are in Jail");
                     while(inJail)
                     {
                         inJail = RollOutOfJail();
+
                     }
                 }
                 //Print current spot after the roll
                 Console.WriteLine("After rolling a {0}, you are now at:  '{1}'",movement,allSpots[currentIndex]);
+                numTimesLanded[currentIndex]++;
+                landedCounter++;
                 //Call method to check if it's a buyable spot or if it has already been bought
                 CheckIfBuyable(currentIndex);
             }
             PrintResults();
             Console.Read();
+            Console.Read();
+            Console.Read();
         }
         public static bool RollOutOfJail()
         {
+            jailRolls++;
             Console.BackgroundColor = ConsoleColor.White;
             Console.ForegroundColor = ConsoleColor.Blue;
             int dice1 = dice.Next(1, 7);
@@ -120,15 +123,24 @@ namespace MonopolySim
                     break;
             }
             if (dice1 == dice2)
+            {
+                doubles++;
                 return false;
+            }
+
             return true;
         }
         public static int Roll()
         {
-           int sumOfDice = 0;
+            int sumOfDice = 0;
+            int die1, die2 = 0;
+            die1 = dice.Next(1,7);
+            die2 = dice.Next(1,7);
 
-            sumOfDice += dice.Next(1,7);
-            sumOfDice += dice.Next(1,7);
+            if (die1 == die2)
+                doubles++;
+            sumOfDice = die1 + die2;
+
             //display sumOfDice just to check
             Console.WriteLine("Rolls a {0}\n---------------------------------------------",sumOfDice);
             switch (sumOfDice)
@@ -202,7 +214,9 @@ namespace MonopolySim
             }
             else
             {
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("{0} is not a buyable spot",allSpots[index]);
+                Console.ResetColor();
             }
             
             if(flag)
@@ -256,11 +270,69 @@ namespace MonopolySim
             Console.WriteLine("Number of 9: {0}/{1} = %{2}", num9, total, 100 * (double)num9 / total);
             Console.WriteLine("Number of 10: {0}/{1} = %{2}", num10, total, 100*(double)num10 / total);
             Console.WriteLine("Number of 11: {0}/{1} = %{2}", num11, total, 100*(double)num11 / total);
-            Console.WriteLine("Number of 12: {0}/{1} = %{2}\n-----------------------------------------------\n", num12,total, 100*(double)num12 /total);
+            Console.WriteLine("Number of 12: {0}/{1} = %{2}", num12, total, 100*(double)num12 / total);
+            Console.WriteLine("Number of doubles:  {0}/{1} = %{2}\n-----------------------------------------------\n", doubles,total,100*(double)doubles/total);
             foreach(string place in ownedSpots)
             {
+                
                 Console.WriteLine("{0} has been bought",place);
             }
+            Console.WriteLine("\n--------------------------------------------\n");
+            double percentage = 0.0;
+            foreach(string land in allSpots)
+            {
+                int indexOfLand = Array.IndexOf(allSpots, land);
+                percentage += 100 * (double)numTimesLanded[indexOfLand] / landedCounter;
+                if (indexOfLand == 1 || indexOfLand == 3)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                    Console.WriteLine("{0} was landed on {1} times = %{2} ", land, numTimesLanded[indexOfLand], 100 * (double)numTimesLanded[indexOfLand] / landedCounter);
+                }
+                else if (indexOfLand == 6 || indexOfLand == 8 || indexOfLand == 9)
+                {
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("{0} was landed on {1} times = %{2} ", land, numTimesLanded[indexOfLand], 100 * (double)numTimesLanded[indexOfLand] / landedCounter);
+                }
+                else if (indexOfLand == 11 || indexOfLand == 13 || indexOfLand == 14)
+                {
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    Console.WriteLine("{0} was landed on {1} times = %{2} ", land, numTimesLanded[indexOfLand], 100 * (double)numTimesLanded[indexOfLand] / landedCounter);
+                }
+                else if (indexOfLand == 16 || indexOfLand == 18 || indexOfLand == 19)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.WriteLine("{0} was landed on {1} times = %{2} ", land, numTimesLanded[indexOfLand], 100 * (double)numTimesLanded[indexOfLand] / landedCounter);
+                }
+                else if (indexOfLand == 21 || indexOfLand == 23 || indexOfLand == 24)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("{0} was landed on {1} times = %{2} ", land, numTimesLanded[indexOfLand], 100 * (double)numTimesLanded[indexOfLand] / landedCounter);
+                }
+                else if (indexOfLand == 26 || indexOfLand == 27 || indexOfLand == 29)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("{0} was landed on {1} times = %{2} ", land, numTimesLanded[indexOfLand], 100 * (double)numTimesLanded[indexOfLand] / landedCounter);
+                }
+                else if (indexOfLand == 31 || indexOfLand == 32 || indexOfLand == 34)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("{0} was landed on {1} times = %{2} ", land, numTimesLanded[indexOfLand], 100 * (double)numTimesLanded[indexOfLand] / landedCounter);
+                }
+                else if (indexOfLand == 37 || indexOfLand == 39)
+                {
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    Console.WriteLine("{0} was landed on {1} times = %{2} ", land, numTimesLanded[indexOfLand], 100 * (double)numTimesLanded[indexOfLand] / landedCounter);
+                }
+                else
+                {
+                    Console.ResetColor();
+                    Console.WriteLine("{0} was landed on {1} times = %{2} ", land, numTimesLanded[indexOfLand], 100 * (double)numTimesLanded[indexOfLand] / landedCounter);
+                }
+            }
+            Console.ResetColor();
+            Console.WriteLine("Total percentage:  %{0}",percentage);
+            Console.WriteLine("The number of times landed on any place is:  {0}",landedCounter);
+            Console.WriteLine("the number of rolls in jail was {0}",jailRolls);
         }
     }
 }
