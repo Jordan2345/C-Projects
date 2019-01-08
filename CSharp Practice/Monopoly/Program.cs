@@ -40,8 +40,8 @@ namespace MonopolySim
                 //check to make sure I don't get an ArrayOutOfBounds Exception
                 if(currentIndex+movement>allSpots.Length)
                 {
-                    int remainder = (currentIndex + movement) - allSpots.Length;
-                    currentIndex = remainder-1;
+                    int remainder = (currentIndex + movement) - 40;
+                    currentIndex = remainder;
                 }
                 else
                 {
