@@ -20,14 +20,11 @@ namespace MonopolySim
         private static string[] ownedSpots= Enumerable.Repeat(string.Empty, 28).ToArray();
         //create 40 ints to count the amount of times landed on a certain place
         private static int[] numTimesLanded = new int[40];
+        private static int[] numCounter = new int[12];
         private static int ownedSpotsIndex = 0;
         private static int landedCounter = 0;
         private static int jailRolls = 0;
         private static Random dice = new Random();
-        private static int num2,num3,num4,num5,num6,num7,num8,num9,num10,num11,num12,doubles=0;
-
-
-
 
         static void Main(string[] args)
         {
@@ -72,63 +69,6 @@ namespace MonopolySim
             }
             PrintResults();
             Console.Read();
-            Console.Read();
-            Console.Read();
-        }
-        public static bool RollOutOfJail()
-        {
-            jailRolls++;
-            Console.BackgroundColor = ConsoleColor.White;
-            Console.ForegroundColor = ConsoleColor.Blue;
-            int dice1 = dice.Next(1, 7);
-            int dice2 = dice.Next(1, 7);
-            Console.WriteLine("You rolled a {0} and a {1}",dice1,dice2);
-            Console.ResetColor();
-            int sumOfDice = 0;
-            sumOfDice = dice1 + dice2;
-            switch (sumOfDice)
-            {
-                case 2:
-                    num2++;
-                    break;
-                case 3:
-                    num3++;
-                    break;
-                case 4:
-                    num4++;
-                    break;
-                case 5:
-                    num5++;
-                    break;
-                case 6:
-                    num6++;
-                    break;
-                case 7:
-                    num7++;
-                    break;
-                case 8:
-                    num8++;
-                    break;
-                case 9:
-                    num9++;
-                    break;
-                case 10:
-                    num10++;
-                    break;
-                case 11:
-                    num11++;
-                    break;
-                case 12:
-                    num12++;
-                    break;
-            }
-            if (dice1 == dice2)
-            {
-                doubles++;
-                return false;
-            }
-
-            return true;
         }
         public static int Roll()
         {
@@ -138,48 +78,33 @@ namespace MonopolySim
             die2 = dice.Next(1,7);
 
             if (die1 == die2)
-                doubles++;
+                numCounter[11]++;
             sumOfDice = die1 + die2;
 
             //display sumOfDice just to check
             Console.WriteLine("Rolls a {0}\n---------------------------------------------",sumOfDice);
-            switch (sumOfDice)
-            {
-                case 2:
-                    num2++;
-                    break;
-                case 3:
-                    num3++;
-                    break;
-                case 4:
-                    num4++;
-                    break;
-                case 5:
-                    num5++;
-                    break;
-                case 6:
-                    num6++;
-                    break;
-                case 7:
-                    num7++;
-                    break;
-                case 8:
-                    num8++;
-                    break;
-                case 9:
-                    num9++;
-                    break;
-                case 10:
-                    num10++;
-                    break;
-                case 11:
-                    num11++;
-                    break;
-                case 12:
-                    num12++;
-                    break;
-            }
+            AddToCounter(sumOfDice);
             return sumOfDice;
+        }
+        public static bool RollOutOfJail()
+        {
+            jailRolls++;
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Blue;
+            int dice1 = dice.Next(1, 7);
+            int dice2 = dice.Next(1, 7);
+            Console.WriteLine("You rolled a {0} and a {1}", dice1, dice2);
+            Console.ResetColor();
+            int sumOfDice = 0;
+            sumOfDice = dice1 + dice2;
+            AddToCounter(sumOfDice);
+            if (dice1 == dice2)
+            {
+                numCounter[11]++;
+                return false;
+            }
+
+            return true;
         }
         public static void CheckIfBuyable(int index)
         {
@@ -259,19 +184,21 @@ namespace MonopolySim
         }
         public static void PrintResults()
         {
-            int total = num2 + num3 + num4 + num5 + num6 + num7 + num8 + num9 + num10 + num11 + num12;
-            Console.WriteLine("\n-----------------------------------------------\nNumber of 2: {0}/{1} = %{2}", num2,total, 100 * (double)num2 /total);
-            Console.WriteLine("Number of 3: {0}/{1} = %{2}", num3, total, 100 * (double)num3 / total);
-            Console.WriteLine("Number of 4: {0}/{1} = %{2}", num4, total, 100 * (double)num4 / total);
-            Console.WriteLine("Number of 5: {0}/{1} = %{2}", num5, total, 100 * (double)num5 / total);
-            Console.WriteLine("Number of 6: {0}/{1} = %{2}", num6, total, 100 * (double)num6 / total);
-            Console.WriteLine("Number of 7: {0}/{1} = %{2}", num7, total, 100 * (double)num7 / total);
-            Console.WriteLine("Number of 8: {0}/{1} = %{2}", num8, total, 100 * (double)num8 / total);
-            Console.WriteLine("Number of 9: {0}/{1} = %{2}", num9, total, 100 * (double)num9 / total);
-            Console.WriteLine("Number of 10: {0}/{1} = %{2}", num10, total, 100*(double)num10 / total);
-            Console.WriteLine("Number of 11: {0}/{1} = %{2}", num11, total, 100*(double)num11 / total);
-            Console.WriteLine("Number of 12: {0}/{1} = %{2}", num12, total, 100*(double)num12 / total);
-            Console.WriteLine("Number of doubles:  {0}/{1} = %{2}\n-----------------------------------------------\n", doubles,total,100*(double)doubles/total);
+            int total = 0;
+            foreach (int count in numCounter)
+                total += count;
+            Console.WriteLine("\n-----------------------------------------------\nNumber of 2: {0}/{1} = %{2}", numCounter[0], total, 100 * (double)numCounter[0] / total);
+            Console.WriteLine("Number of 3: {0}/{1} = %{2}", numCounter[1], total, 100 * (double)numCounter[1] / total);
+            Console.WriteLine("Number of 4: {0}/{1} = %{2}", numCounter[2], total, 100 * (double)numCounter[2] / total);
+            Console.WriteLine("Number of 5: {0}/{1} = %{2}", numCounter[3], total, 100 * (double)numCounter[3] / total);
+            Console.WriteLine("Number of 6: {0}/{1} = %{2}", numCounter[4], total, 100 * (double)numCounter[4] / total);
+            Console.WriteLine("Number of 7: {0}/{1} = %{2}", numCounter[5], total, 100 * (double)numCounter[5] / total);
+            Console.WriteLine("Number of 8: {0}/{1} = %{2}", numCounter[6], total, 100 * (double)numCounter[6] / total);
+            Console.WriteLine("Number of 9: {0}/{1} = %{2}", numCounter[7], total, 100 * (double)numCounter[7] / total);
+            Console.WriteLine("Number of 10: {0}/{1} = %{2}", numCounter[8], total, 100*(double)numCounter[8] / total);
+            Console.WriteLine("Number of 11: {0}/{1} = %{2}", numCounter[9], total, 100*(double)numCounter[9] / total);
+            Console.WriteLine("Number of 12: {0}/{1} = %{2}", numCounter[10], total, 100*(double)numCounter[10] / total);
+            Console.WriteLine("Number of doubles:  {0}/{1} = %{2}\n-----------------------------------------------\n", numCounter[11], total,100*(double)numCounter[11] / total);
             foreach(string place in ownedSpots)
             {
                 
@@ -333,6 +260,45 @@ namespace MonopolySim
             Console.WriteLine("Total percentage:  %{0}",percentage);
             Console.WriteLine("The number of times landed on any place is:  {0}",landedCounter);
             Console.WriteLine("the number of rolls in jail was {0}",jailRolls);
+        }
+        private static void AddToCounter(int sum)
+        {
+            switch (sum)
+            {
+                case 2:
+                    numCounter[0]++;
+                    break;
+                case 3:
+                    numCounter[1]++;
+                    break;
+                case 4:
+                    numCounter[2]++;
+                    break;
+                case 5:
+                    numCounter[3]++;
+                    break;
+                case 6:
+                    numCounter[4]++;
+                    break;
+                case 7:
+                    numCounter[5]++;
+                    break;
+                case 8:
+                    numCounter[6]++;
+                    break;
+                case 9:
+                    numCounter[7]++;
+                    break;
+                case 10:
+                    numCounter[8]++;
+                    break;
+                case 11:
+                    numCounter[9]++;
+                    break;
+                case 12:
+                    numCounter[10]++;
+                    break;
+            }
         }
     }
 }
