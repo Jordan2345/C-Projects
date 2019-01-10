@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,33 +10,43 @@ namespace MonopolySim
     class Program
     {
         private static string[] buyableSpots = {"Mediterranean Avenue","Baltic Avenue","Reading Railroad","Oriental Avenue","Vermont Avenue","Connecticut Avenue","St. Charles Place","Electric Company",
-                                     "States Avenue","Viginia Avenue","Pennsylvania Railroad","St. James Place","Tennessee Avenue","New York Avenue","Kentucky Avenue","Indiana Avenue","Illinois Avenue",
-                                     "B&O railroad","Atlantic Avenue","Ventor Avenue","Water Works","Marvin Gardens","Pacific Avenue","North Carolina Avenue","Pennsylvania Avenue","Short line",
-                                     "Park Place","Boardwalk"};
+                                            "States Avenue","Virginia Avenue","Pennsylvania Railroad","St. James Place","Tennessee Avenue","New York Avenue","Kentucky Avenue","Indiana Avenue","Illinois Avenue",
+                                            "B&O railroad","Atlantic Avenue","Ventor Avenue","Water Works","Marvin Gardens","Pacific Avenue","North Carolina Avenue","Pennsylvania Avenue","Short line",
+                                            "Park Place","Boardwalk"};
         private static string[] allSpots = {"Go","Mediterranean Avenue","Community Chest1","Baltic Avenue","Income Tax","Reading Railroad","Oriental Avenue","Chance1","Vermont Avenue","Connecticut Avenue","In Jail/Just Visiting","St. Charles Place","Electric Company",
-                                     "States Avenue","Viginia Avenue","Pennsylvania Railroad","St. James Place","Community Chest2","Tennessee Avenue","New York Avenue","Free Parking","Kentucky Avenue","Chance2","Indiana Avenue","Illinois Avenue",
-                                     "B&O railroad","Atlantic Avenue","Ventor Avenue","Water Works","Marvin Gardens","Go To Jail","Pacific Avenue","North Carolina Avenue","Community Chest3","Pennsylvania Avenue","Short line",
-                                     "Chance3","Park Place","Luxury Tax","Boardwalk"};
+                                            "States Avenue","Virginia Avenue","Pennsylvania Railroad","St. James Place","Community Chest2","Tennessee Avenue","New York Avenue","Free Parking","Kentucky Avenue","Chance2","Indiana Avenue","Illinois Avenue",
+                                            "B&O railroad","Atlantic Avenue","Ventor Avenue","Water Works","Marvin Gardens","Go To Jail","Pacific Avenue","North Carolina Avenue","Community Chest3","Pennsylvania Avenue","Short line",
+                                            "Chance3","Park Place","Luxury Tax","Boardwalk"};
+        private static string[] chestCards =  { "Advance to 'Go'. (Collect $200) ", "Bank error in your favor. Collect $200","Doctor's fees. Pay $50.", "From sale of stock you get $50.", "Get Out of Jail Free.",
+                                                "Go to Jail. Go directly to jail. Do not pass Go, Do not collect $200.","Grand Opera Night. Collect $50 from every player for opening night seats.",
+                                                "Holiday Fund matures. Collect $100.","Income tax refund. Collect $20.","Life insurance matures – Collect $100","Hospital Fees. Pay $50.","School fees. Pay $50.",
+                                                "Receive $25 consultancy fee.","You are assessed for street repairs: Pay $40 per house and $115 per hotel you own.","You have won second prize in a beauty contest. Collect $10.",
+                                                "You inherit $100."};
+        private static string[] chanceCards = { "Advance to 'Go'. (Collect $200)", "Advance to Illinois Ave.", "Advance to St. Charles Place.", "Advance token to nearest Utility.", "Advance token to the nearest Railroad",
+                                                "Bank pays you dividend of $50.","Get out of Jail Free.","Go Back Three 3 Spaces.","Go to Jail. Go directly to Jail.","Make general repairs on all your property: For each house pay $25, For each hotel pay $100.",
+                                                "Pay poor tax of $15","Take a trip to Reading Railroad.","Take a walk on the Boardwalk. Advance token to Boardwalk. ","You have been elected Chairman of the Board. Pay each player $50.",
+                                                "Your building and loan matures. Collect $150.","You win a crossword puzzle. Collect $50"};
         //create 28 empty strings
         private static string[] ownedSpots= Enumerable.Repeat(string.Empty, 28).ToArray();
         //create 40 ints to count the amount of times landed on a certain place
         private static int[] numTimesLanded = new int[40];
         private static int[] numCounter = new int[12];
-        private static int ownedSpotsIndex = 0;
-        private static int landedCounter = 0;
-        private static int jailRolls = 0;
+        private static int ownedSpotsIndex,chestIndex,chanceIndex,jailRolls,landedCounter = 0;
+        //create an arraylist that holds the get out of jail cards
+        private static ArrayList getOutOfJailCards = new ArrayList();
         private static Random dice = new Random();
 
         static void Main(string[] args)
         {
-            //create a current index for allSpots
+            //create a current index for your piece
             int currentIndex = 0;
+            bool inJail = false;
             Console.WriteLine("Currently at {0}",allSpots[currentIndex]);
-            while(!GameOver())
+            while (!GameOver())
             {
                 int movement = Roll();
                 //check to make sure I don't get an ArrayOutOfBounds Exception
-                if(currentIndex+movement>allSpots.Length)
+                if (currentIndex + movement > allSpots.Length)
                 {
                     int remainder = (currentIndex + movement) - 40;
                     currentIndex = remainder;
@@ -47,21 +58,185 @@ namespace MonopolySim
                 //index 40 is 'Go'
                 if (currentIndex == 40)
                     currentIndex = 0;
-                else if(currentIndex==30)
+                //Print current spot after the roll
+                Console.WriteLine("After rolling a {0}, you are now at:  '{1}'", movement, allSpots[currentIndex]);
+
+                //check the chance and community cards if landed on
+                //first check Community chest
+                if (currentIndex == 2 || currentIndex == 17 || currentIndex == 33)
+                {
+                    //print out the result of the card
+                    Console.BackgroundColor = ConsoleColor.Yellow;
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    Console.WriteLine(chestCards[chestIndex]);
+                    //Check if the cards are movement based
+                    if (chestIndex == 0)
+                    {
+                        //move to 'Go'
+                        currentIndex = 0;
+                        Console.WriteLine("You are now at {0}",allSpots[currentIndex]);
+                    }
+                    else if(chestIndex==4)
+                    {
+                        //add a 'Get out of Jail free' card
+                        getOutOfJailCards.Add("Get Out");
+                    }
+                    else if (chestIndex == 5)
+                    {
+                        //go to jail
+                        currentIndex = 10;
+                        inJail = true;
+                    }
+                    //check to make sure chestIndex does not exceed chestCard length
+                    if (chestIndex == 15)
+                    {
+                        //reset the cards
+                        chestIndex = 0;
+                    }
+                    else
+                        chestIndex++;
+                    Console.ResetColor();
+                }
+                //now check the chance cards
+                else if(currentIndex==7 || currentIndex==22 || currentIndex==36)
+                {
+                    //print out the result of the card
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    Console.WriteLine(chanceCards[chanceIndex]);
+                    //Check the movement based cards
+                    if(chanceIndex==0)
+                    {
+                        //move to 'Go'
+                        currentIndex = 0;
+                        Console.WriteLine("You are now at {0}",allSpots[currentIndex]);
+                    }
+                    else if(chanceIndex==1)
+                    {
+                        //go to Illinois avenue
+                        currentIndex = 24;
+                        Console.WriteLine("You are now at {0}",allSpots[currentIndex]);
+                    }
+                    else if(chanceIndex==2)
+                    {
+                        //go to St. Charles
+                        currentIndex = 11;
+                        Console.WriteLine("You are now at {0}",allSpots[currentIndex]);
+                    }
+                    else if(chanceIndex==3)
+                    {
+                        //go to nearest util
+                        if(currentIndex==0 || currentIndex < 20)
+                        {
+                            //go to electric company
+                            currentIndex = 12;
+                            Console.WriteLine("You are now at {0}",allSpots[currentIndex]);
+                        }
+                        else
+                        {
+                            //go to water works
+                            currentIndex = 28;
+                            Console.WriteLine("You are now at {0}",allSpots[currentIndex]);
+                        }
+                    }
+                    else if(chanceIndex==4)
+                    {
+                        //go to nearest railroad
+                        if(currentIndex<=9)
+                        {
+                            //go to Reading Railroad
+                            currentIndex = 5;
+                            Console.WriteLine("You are now at {0}",allSpots[currentIndex]);
+                        }
+                        else if(currentIndex<=19)
+                        {
+                            //go to Pennsylvania Railroad
+                            currentIndex = 15;
+                            Console.WriteLine("You are now at {0}",allSpots[currentIndex]);
+                        }
+                        else if(currentIndex<=29)
+                        {
+                            //go to B&O Railroad
+                            currentIndex = 25;
+                            Console.WriteLine("You are now at {0}",allSpots[currentIndex]);
+                        }
+                        else
+                        {
+                            //go to Short Line RailRoad
+                            currentIndex = 35;
+                            Console.WriteLine("You are now at {0}",allSpots[currentIndex]);
+                        }
+                    }
+                    else if(chanceIndex==6)
+                    {
+                        //add a 'Get out of Jail free' card
+                        getOutOfJailCards.Add("Get Out");
+                    }
+                    else if(chanceIndex==7)
+                    {
+                        //go back 3 spaces
+                        //check to make sure it is not negative
+                        if (currentIndex - 3 < 0)
+                        {
+                            int remainder = Math.Abs(currentIndex - 3);
+                            currentIndex = 40 - remainder;
+                        }
+                        else
+                            currentIndex -= 3;
+                        Console.WriteLine("You are now at {0}",allSpots[currentIndex]);
+                    }
+                    else if(chanceIndex==8)
+                    {
+                        //go to jail
+                        inJail = true;
+                        currentIndex = 10;
+                        Console.WriteLine("You are now at {0}",allSpots[currentIndex]);
+                    }
+                    else if(chanceIndex==11)
+                    {
+                        //go to Reading Railroad
+                        currentIndex = 5;
+                        Console.WriteLine("You are now at {0}",allSpots[currentIndex]);
+                    }
+                    else if(chanceIndex==12)
+                    {
+                        //go to Boardwalk
+                        currentIndex = 39;
+                        Console.WriteLine("You are now at {0}",allSpots[currentIndex]);
+                    }
+                    //Now do checks to make cure chanceIndex does not exceed chanceCards length
+                    if (chanceIndex == 15)
+                    {
+                        //reset the cards
+                        chanceIndex = 0;
+                    }
+                    else
+                        chanceIndex++;
+                    Console.ResetColor();
+                }
+                if (currentIndex == 30 || inJail)
                 {
                     numTimesLanded[currentIndex]++;
                     landedCounter++;
-                    bool inJail = true;
+                    inJail = true;
                     currentIndex = 10;
                     Console.WriteLine("You are in Jail");
-                    while(inJail)
+                    while (inJail)
                     {
-                        inJail = RollOutOfJail();
-
+                        if(getOutOfJailCards.Contains("Get Out"))
+                        {
+                            getOutOfJailCards.Remove("Get Out");
+                            Console.BackgroundColor = ConsoleColor.White;
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("You used a get out of jail card.  You have {0} cards remaining",getOutOfJailCards.Count);
+                            inJail = false;
+                            Console.ResetColor();
+                        }
+                        else
+                            inJail = RollOutOfJail();
                     }
+                    Console.WriteLine("You are now out of jail.");
                 }
-                //Print current spot after the roll
-                Console.WriteLine("After rolling a {0}, you are now at:  '{1}'",movement,allSpots[currentIndex]);
                 numTimesLanded[currentIndex]++;
                 landedCounter++;
                 //Call method to check if it's a buyable spot or if it has already been bought
@@ -77,17 +252,16 @@ namespace MonopolySim
             die1 = dice.Next(1,7);
             die2 = dice.Next(1,7);
 
-            if (die1 == die2)
-                numCounter[11]++;
             sumOfDice = die1 + die2;
 
             //display sumOfDice just to check
-            Console.WriteLine("Rolls a {0}\n---------------------------------------------",sumOfDice);
-            AddToCounter(sumOfDice);
+            Console.WriteLine("Rolls...\n---------------------------------------------");
+            AddToCounter(sumOfDice,die1,die2);
             return sumOfDice;
         }
         public static bool RollOutOfJail()
         {
+            int sumOfDice = 0;
             jailRolls++;
             Console.BackgroundColor = ConsoleColor.White;
             Console.ForegroundColor = ConsoleColor.Blue;
@@ -95,12 +269,10 @@ namespace MonopolySim
             int dice2 = dice.Next(1, 7);
             Console.WriteLine("You rolled a {0} and a {1}", dice1, dice2);
             Console.ResetColor();
-            int sumOfDice = 0;
             sumOfDice = dice1 + dice2;
-            AddToCounter(sumOfDice);
+            AddToCounter(sumOfDice,dice1,dice2);
             if (dice1 == dice2)
             {
-                numCounter[11]++;
                 return false;
             }
 
@@ -201,7 +373,6 @@ namespace MonopolySim
             Console.WriteLine("Number of doubles:  {0}/{1} = %{2}\n-----------------------------------------------\n", numCounter[11], total,100*(double)numCounter[11] / total);
             foreach(string place in ownedSpots)
             {
-                
                 Console.WriteLine("{0} has been bought",place);
             }
             Console.WriteLine("\n--------------------------------------------\n");
@@ -261,8 +432,10 @@ namespace MonopolySim
             Console.WriteLine("The number of times landed on any place is:  {0}",landedCounter);
             Console.WriteLine("the number of rolls in jail was {0}",jailRolls);
         }
-        private static void AddToCounter(int sum)
+        private static void AddToCounter(int sum,int dice1, int dice2)
         {
+            if (dice1 == dice2)
+                numCounter[11]++;
             switch (sum)
             {
                 case 2:
@@ -300,5 +473,6 @@ namespace MonopolySim
                     break;
             }
         }
+
     }
 }
