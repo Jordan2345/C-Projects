@@ -6,17 +6,14 @@ public class RetrieveName:MonoBehaviour  {
 
     public static RetrieveName save_Names;
     public TMP_InputField inputField;
+    public GameObject input;
     public string userName;
 
     private void Awake()
     {
-        if (save_Names == null)
-        {
-            save_Names = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-            Destroy(gameObject);
+        input = GameObject.Find("NameInput");
+        inputField = input.GetComponent<TMP_InputField>();
+        save_Names = this;
     }
 
     public void SetName()

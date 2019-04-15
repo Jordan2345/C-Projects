@@ -120,6 +120,10 @@ public class GameControl : MonoBehaviour
         Debug.Log(name);
         if(File.Exists(Application.persistentDataPath + "/GameInfo/GameInfoEarth" + name + ".dat") || File.Exists(Application.persistentDataPath + "/GameInfo/GameInfoMoon" + name + ".dat"))
         {
+            if(name.Equals(""))
+            {
+                Debug.Log("No name entered");
+            }
             //checks if there is already a file with the same given name
             SceneManager.LoadScene("Startup");
             Debug.Log("File with name [" + name + "] already exists");
